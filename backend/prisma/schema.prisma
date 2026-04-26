@@ -1,0 +1,136 @@
+// Multi-tenant SaaS-ready Attendance Management Schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Company {
+  id                 String              @id @default(uuid())
+  name               String
+  slug               String              @unique
+  isActive           Boolean             @default(true)
+  settings           CompanySettings?
+  users              User[]
+  attendanceRecords  AttendanceRecord[]
+  correctionRequests CorrectionRequest[]
+  auditLogs          AuditLog[]
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+}
+
+model CompanySettings {
+  id              String   @id @default(uuid())
+  companyId       String   @unique
+  company         Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  workStartTime   String   @default("09:00")
+  workEndTime     String   @default("18:00")
+  gracePeriodMin  Int      @default(15)
+  halfDayAfterMin Int      @default(240)
+  fullDayHours    Float    @default(8.0)
+  timezone        String   @default("Asia/Kolkata")
+  updatedAt       DateTime @updatedAt
+}
+
+model Role {
+  id          String   @id @default(uuid())
+  name        String   // SUPER_ADMIN, ADMIN, HR, EMPLOYEE
+  description String?
+  users       User[]
+  createdAt   DateTime @default(now())
+
+  @@unique([name])
+}
+
+model User {
+  id                  String              @id @default(uuid())
+  email               String              @unique
+  password            String
+  firstName           String
+  lastName            String
+  roleId              String
+  role                Role                @relation(fields: [roleId], references: [id])
+  companyId           String?
+  company             Company?            @relation(fields: [companyId], references: [id])
+  isActive            Boolean             @default(true)
+  attendanceRecords   AttendanceRecord[]
+  correctionRequests  CorrectionRequest[] @relation("Requester")
+  approvedRequests    CorrectionRequest[] @relation("Approver")
+  auditLogs           AuditLog[]
+  refreshTokens       RefreshToken[]
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
+
+  @@index([companyId])
+}
+
+model AttendanceRecord {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  companyId   String
+  company     Company  @relation(fields: [companyId], references: [id])
+  date        DateTime @db.Date
+  clockIn     DateTime?
+  clockOut    DateTime?
+  workHours   Float?
+  status      String   // PRESENT, ABSENT, HALF_DAY, ON_LEAVE
+  isManual    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([userId, date])
+  @@index([companyId, date])
+}
+
+model CorrectionRequest {
+  id            String    @id @default(uuid())
+  requesterId   String
+  requester     User      @relation("Requester", fields: [requesterId], references: [id])
+  companyId     String
+  company       Company   @relation(fields: [companyId], references: [id])
+  attendanceId  String
+  requestType   String    // MISSED_IN, MISSED_OUT, WRONG_IN, WRONG_OUT
+  currentTime   DateTime?
+  correctedTime DateTime
+  reason        String
+  status        String    @default("PENDING")
+  approverId    String?
+  approver      User?     @relation("Approver", fields: [approverId], references: [id])
+  remarks       String?
+  reviewedAt    DateTime?
+  createdAt     DateTime  @default(now())
+
+  @@index([companyId, status])
+}
+
+model AuditLog {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  companyId   String
+  company     Company  @relation(fields: [companyId], references: [id])
+  action      String
+  entityType  String
+  entityId    String
+  oldValue    String?
+  newValue    String?
+  ipAddress   String?
+  userAgent   String?
+  createdAt   DateTime @default(now())
+
+  @@index([companyId, createdAt])
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}

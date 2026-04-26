@@ -1,0 +1,41 @@
+# Dependencies
+node_modules/
+
+# Environment (never commit secrets)
+.env
+.env.*
+!.env.example
+
+# Build output
+dist/
+build/
+.vite/
+*.tsbuildinfo
+
+# Logs
+*.log
+npm-debug.log*
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# IDE / editor (optional local settings)
+.idea/
+*.swp
+*.swo
+
+# Prisma
+# Keep: prisma/migrations/ — do NOT ignore; commit migration history
+*.db
+*.db-journal
+
+# Test / coverage
+coverage/
+.nyc_output/
+
+# Misc
+.turbo
+.cache

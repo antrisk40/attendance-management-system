@@ -1,0 +1,5 @@
+node_modules
+.env
+*.log
+dist
+# Commit prisma/migrations/ so all environments share the same schema history
