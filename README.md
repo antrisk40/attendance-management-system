@@ -117,7 +117,7 @@ Configure in **Site configuration → Build & deploy → Build settings** (or eq
 | **Publish directory** | `frontend/dist` or `./frontend/dist` (must match your layout; with base `frontend`, some setups use `dist` only) |
 | **Node.js** (dependency management) | e.g. `22.x` (matches the default or set explicitly) |
 
-In **Environment variables** (for the build, not only “runtime”): set **`VITE_API_BASE_URL`** to your real API base **including `/api`**, e.g. `https://your-api.example.com/api`, then **trigger a new deploy** so Vite bakes it in at build time.
+In **Environment variables** (for the build, not only “runtime”): set **`VITE_API_BASE_URL`** to your API server, e.g. `https://your-app.onrender.com` (origin only is fine; the app adds `/api`) or `https://your-app.onrender.com/api` explicitly. Then **redeploy** so Vite bakes it in at build time.
 
 If you are **not** using Netlify Functions, you can clear **Functions directory** in the UI or point it to an empty/unused path so the project does not need `frontend/netlify/functions`.
 

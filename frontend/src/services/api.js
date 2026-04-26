@@ -1,13 +1,43 @@
 import axios from 'axios'
 
-// Local dev: use relative "/api" + Vite proxy. Static hosts (Netlify, etc.): set VITE_API_BASE_URL
-// at build time to your real API, e.g. https://api.yourdomain.com/api (include the /api path)
-const API_BASE = (import.meta.env.VITE_API_BASE_URL || '/api').replace(/\/$/, '')
+/**
+ * Resolve API base URL. Express mounts routes under `/api` (e.g. `/api/auth/login`).
+ * - Local dev: unset → `/api` (Vite proxy).
+ * - Production: set `VITE_API_BASE_URL` to your API host. You may use either:
+ *   - `https://your-service.onrender.com/api` (explicit), or
+ *   - `https://your-service.onrender.com` (origin only) — we append `/api` so requests
+ *     hit `/api/auth/login`, not `/auth/login` (which 404s on Render).
+ */
+function resolveApiBase() {
+  const raw = import.meta.env.VITE_API_BASE_URL?.trim()
+  if (!raw) return '/api'
+
+  let base = raw.replace(/\/$/, '')
+  if (base === '/api') return '/api'
+
+  if (base.startsWith('http://') || base.startsWith('https://')) {
+    try {
+      const u = new URL(base)
+      const path = u.pathname.replace(/\/$/, '') || '/'
+      // Origin only (e.g. Render/Railway URL with no path) → append /api
+      if (path === '/' || path === '') {
+        u.pathname = '/api'
+        return u.href.replace(/\/$/, '')
+      }
+    } catch {
+      return base
+    }
+  }
+
+  return base
+}
+
+const API_BASE = resolveApiBase()
 
 if (import.meta.env.PROD && !import.meta.env.VITE_API_BASE_URL) {
   // eslint-disable-next-line no-console
   console.warn(
-    '[attendance] Set VITE_API_BASE_URL in your build (e.g. Netlify env) to your API base URL, e.g. https://api.example.com/api — relative /api will 404 on static hosting.'
+    '[attendance] Set VITE_API_BASE_URL in your build (e.g. Netlify) to your API origin, e.g. https://your-app.onrender.com — relative /api will 404 on static hosting.'
   )
 }
 
