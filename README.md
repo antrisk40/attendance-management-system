@@ -100,6 +100,33 @@ docker compose up --build
 
 Set strong `JWT_SECRET` and `JWT_REFRESH_SECRET` (env file or host environment) before any real deployment.
 
+## Deploying the frontend (Netlify, Vercel, static hosting)
+
+Netlify only serves **static files**. There is **no** `/api` on `*.netlify.app`, so requests to `/api/auth/login` return **404** unless you point the app at a real API (see `VITE_API_BASE_URL` below).
+
+### Netlify
+
+**SPA routing (refresh on `/login`, etc.):** **`frontend/netlify.toml`** declares a single rewrite: `/*` → `/index.html` with status **200**, so you do not need to configure redirects in the Netlify UI. Keep **Base directory** set to **`frontend`** so this file is picked up with your build.
+
+Configure in **Site configuration → Build & deploy → Build settings** (or equivalent):
+
+| Setting | Example |
+|--------|---------|
+| **Base directory** | `frontend` or `./frontend` |
+| **Build command** | `npm run build` |
+| **Publish directory** | `frontend/dist` or `./frontend/dist` (must match your layout; with base `frontend`, some setups use `dist` only) |
+| **Node.js** (dependency management) | e.g. `22.x` (matches the default or set explicitly) |
+
+In **Environment variables** (for the build, not only “runtime”): set **`VITE_API_BASE_URL`** to your real API base **including `/api`**, e.g. `https://your-api.example.com/api`, then **trigger a new deploy** so Vite bakes it in at build time.
+
+If you are **not** using Netlify Functions, you can clear **Functions directory** in the UI or point it to an empty/unused path so the project does not need `frontend/netlify/functions`.
+
+1. **Host the Node API** somewhere with a public URL (this repo’s `backend/`).
+2. Set **`VITE_API_BASE_URL`** in Netlify (build context) as above; **redeploy** after any change.
+3. On the API, set **`CORS_ORIGIN`** to your site origin(s), comma-separated, e.g. `https://your-app.netlify.app,http://localhost:5173`
+
+Details: `frontend/.env.example`.
+
 ## Sample credentials (after seed)
 
 Use these in the same order as roles (Super Admin → Admin → HR → Employee).

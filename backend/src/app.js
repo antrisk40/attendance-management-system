@@ -17,11 +17,22 @@ import superAdminRoutes from './routes/superAdminRoutes.js';
 
 const app = express();
 
+const getCorsOrigins = () => {
+  const raw = process.env.CORS_ORIGIN;
+  if (!raw) return ['http://localhost:5173'];
+  return raw.split(',').map((s) => s.trim()).filter(Boolean);
+};
+
 // Security middleware
 app.use(helmet());
 app.use(
   cors({
-    origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
+    origin: (origin, callback) => {
+      const allowed = getCorsOrigins();
+      if (!origin) return callback(null, true);
+      if (allowed.includes(origin)) return callback(null, true);
+      return callback(null, false);
+    },
     credentials: true,
   })
 );

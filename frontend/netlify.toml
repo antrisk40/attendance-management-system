@@ -1,0 +1,6 @@
+# Netlify: SPA fallback so /login and other client routes work on refresh.
+# Use with Site settings → Base directory: frontend (or ./frontend)
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
