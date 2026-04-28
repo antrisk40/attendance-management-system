@@ -129,15 +129,16 @@ Details: `frontend/.env.example`.
 
 ## Sample credentials (after seed)
 
-Use these in the same order as roles (Super Admin → Admin → HR → Employee).
+Run `cd backend && npm run seed`. The script creates **three Indian-named companies** with users and **sample attendance 20–26 Apr 2026** (IST). Emails use **`firstname.lastname@company.co.in`**.
 
-| # | Role        | Email                 | Password  |
-|---|-------------|------------------------|-----------|
-| 1 | Super Admin | `superadmin@platform.com` | `super123` |
-| 2 | Admin       | `admin@company.com`   | `admin123`  |
-| 3 | HR          | `hr@company.com`      | `hr123`     |
-| 4 | Employee    | `john@company.com`    | `emp123`    |
-| 5 | Employee    | `jane@company.com`    | `emp123`    |
+**Already seeded with old addresses?** Run `npm run seed2` once to move users to the same format (see `src/seed2.js`).
+
+| Role | Email | Password |
+|------|--------|----------|
+| Super Admin | `superadmin@platform.com` | `super123` |
+| **Nakshatra** — `@nakshatrainfotech.co.in` | e.g. `raghav.iyer@…`, `kavya.reddy@…`, `vikram.mehta@…` | `admin123` / `hr123` / `emp123` |
+| **Arvind** — `@arvindengineering.co.in` | e.g. `suresh.patel@…`, `priya.desai@…` | same |
+| **Meera** — `@meerahealthcare.co.in` | e.g. `anil.bose@…`, `aditi.rao@…` | same |
 
 ## Project structure
 

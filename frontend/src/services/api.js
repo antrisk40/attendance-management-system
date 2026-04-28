@@ -16,6 +16,11 @@ function resolveApiBase() {
   if (base === '/api') return '/api'
 
   if (base.startsWith('http://') || base.startsWith('https://')) {
+    // If the site is HTTPS, the API must be HTTPS too (browser blocks mixed content).
+    if (typeof window !== 'undefined' && window.location?.protocol === 'https:' && base.startsWith('http://')) {
+      base = base.replace(/^http:\/\//, 'https://')
+    }
+
     try {
       const u = new URL(base)
       const path = u.pathname.replace(/\/$/, '') || '/'
